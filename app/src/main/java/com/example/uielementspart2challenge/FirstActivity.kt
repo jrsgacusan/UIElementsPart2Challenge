@@ -1,13 +1,15 @@
 package com.example.uielementspart2challenge
 
+import android.annotation.SuppressLint
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.util.Log
 import android.view.*
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.ListView
+import com.google.android.material.snackbar.Snackbar
+
 
 class FirstActivity : AppCompatActivity() {
 
@@ -21,14 +23,16 @@ class FirstActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_first)
 
-
+         var songsListView  = findViewById<ListView>(R.id.songsListView)
 
         //Adapter for the list view
         val adapter = ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, songsArray)
-        val songsListView = findViewById<ListView>(R.id.songsListView)
         songsListView.adapter = adapter
+
         //Register the context menu to the List View
         registerForContextMenu(songsListView)
+
+
     }
     //Context Menu
     override fun onCreateContextMenu(
@@ -40,11 +44,19 @@ class FirstActivity : AppCompatActivity() {
         val inflater: MenuInflater = menuInflater
         inflater.inflate(R.menu.options_menu, menu)
     }
+
     override fun onContextItemSelected(item: MenuItem): Boolean {
         val menuInfo = item.menuInfo as AdapterView.AdapterContextMenuInfo //Allows us to inherit from the class Adapterview.AdapterCOntextMenuInfo to get the position
         return when (item.itemId) {
             R.id.add_song_to_queue -> {
                 queuedSongs.add(songsArray[menuInfo.position])
+                val snackbar = Snackbar.make(findViewById(R.id.songsListView), "${songsArray[menuInfo.position]} is added to the Queue.", Snackbar.LENGTH_LONG)
+                snackbar.setAction("Queue", View.OnClickListener { //Lamda function
+                    val intent = Intent(this, QueueActivity::class.java)
+                    intent.putStringArrayListExtra("songs", queuedSongs)
+                    startActivity(intent)
+                })
+                snackbar.show()
                 true
             }
             else -> {
@@ -54,6 +66,7 @@ class FirstActivity : AppCompatActivity() {
         }
 
     }
+
 
     //Main Menu
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
