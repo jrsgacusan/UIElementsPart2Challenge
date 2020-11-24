@@ -27,17 +27,18 @@ class QueueActivity : AppCompatActivity() {
     private val channelId = "i.apps.notifications"
     private val description = "Test notification"
 
-    lateinit var songsToBeDisplayedList: MutableList<String>
+
     lateinit var adapter: ArrayAdapter<String>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_queue)
 
-        songsToBeDisplayedList = intent.getStringArrayListExtra("songs")!!.toMutableList()
-        adapter = ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, songsToBeDisplayedList)
+        //adapter for the queued songs
+        adapter = ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, queuedSongs)
+        //Map the list view
         val queuedSongsListView = findViewById<ListView>(R.id.queuedSongs)
-        //Attach the adapter
+        //Attach the adapter to the list view
         queuedSongsListView.adapter = adapter
         //Register context menu
         registerForContextMenu(queuedSongsListView)
@@ -58,12 +59,12 @@ class QueueActivity : AppCompatActivity() {
         val menuInfo = item.menuInfo as AdapterView.AdapterContextMenuInfo //Allows us to inherit from the class Adapterview.AdapterCOntextMenuInfo to get the position
         return when (item.itemId) {
             R.id.removeSong -> {
-                val song = songsToBeDisplayedList[menuInfo.position]
-                songsToBeDisplayedList.removeAt(menuInfo.position) //gets the position and remove
+                val song = queuedSongs[menuInfo.position]
+                queuedSongs.removeAt(menuInfo.position) //gets the position and remove
                 adapter.notifyDataSetChanged() //Notify the adapter
                 Toast.makeText(this, "$song is removed from Queue.", Toast.LENGTH_SHORT).show()
                 //Notification that will be fired when the size of the array is == 0
-                if (songsToBeDisplayedList.size <= 0) {
+                if (queuedSongs.size <= 0) {
                     notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
                     //Display the notification
                     val pendingIntent = PendingIntent.getActivity(applicationContext, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT)

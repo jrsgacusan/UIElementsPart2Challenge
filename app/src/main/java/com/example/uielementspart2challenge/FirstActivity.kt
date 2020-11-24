@@ -10,28 +10,27 @@ import android.widget.ArrayAdapter
 import android.widget.ListView
 import com.google.android.material.snackbar.Snackbar
 
+val queuedSongs = ArrayList<String>() //Array where all the songs queued will be stored and will be passed to the Queue activity
+val songsArray = arrayListOf<String>()
 
 class FirstActivity : AppCompatActivity() {
-
-    val queuedSongs = ArrayList<String>() //Array where all the songs queued will be stored and will be passed to the Queue activity
-    val songsArray = arrayOf("Eraser", "Castle on the Hill", "Dive", "Shape of you", "Perfect", //Dive Album
-        "Survival", "Nonstop", "Elevate", "Emotionless", "God's Plan", //Scorpion Album
-        "Come Together", "Something", "Maxwell's Silver Hammer", "Oh! Darling", "Octopus's Garden") //Abbey Road Album
-
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_first)
 
-         var songsListView  = findViewById<ListView>(R.id.songsListView)
+        //Add the songs
+        songsArray.addAll(resources.getStringArray(R.array.scorpion))
+        songsArray.addAll(resources.getStringArray(R.array.abbeyRoad))
+        songsArray.addAll(resources.getStringArray(R.array.divide))
 
+        //Map the views
+        var songsListView  = findViewById<ListView>(R.id.songsListView)
         //Adapter for the list view
         val adapter = ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, songsArray)
         songsListView.adapter = adapter
 
         //Register the context menu to the List View
         registerForContextMenu(songsListView)
-
 
     }
     //Context Menu
@@ -53,7 +52,6 @@ class FirstActivity : AppCompatActivity() {
                 val snackbar = Snackbar.make(findViewById(R.id.songsListView), "${songsArray[menuInfo.position]} is added to the Queue.", Snackbar.LENGTH_LONG)
                 snackbar.setAction("Queue", View.OnClickListener { //Lamda function
                     val intent = Intent(this, QueueActivity::class.java)
-                    intent.putStringArrayListExtra("songs", queuedSongs)
                     startActivity(intent)
                 })
                 snackbar.show()
@@ -87,7 +85,6 @@ class FirstActivity : AppCompatActivity() {
             }
             R.id.go_to_queue -> {
                 val intent = Intent(this, QueueActivity::class.java)
-                intent.putStringArrayListExtra("songs", queuedSongs)
                 startActivity(intent)
                 true
             }

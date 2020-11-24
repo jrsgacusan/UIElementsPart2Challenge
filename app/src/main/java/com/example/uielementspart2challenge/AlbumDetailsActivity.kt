@@ -20,20 +20,18 @@ import com.google.android.material.snackbar.Snackbar
 import java.util.*
 
 class AlbumDetailsActivity : AppCompatActivity() {
-    lateinit var songsToBeDisplayed: MutableList<String>
-    lateinit var adapter: ArrayAdapter<String>
 
+    lateinit var adapter : ArrayAdapter<String>
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_album_details)
 
         //Get the extra from the previous activity
         val uri = intent.getStringExtra("imageUri")
-        songsToBeDisplayed = intent.getStringArrayListExtra("songs")!!.toMutableList()
 
-        //Mapping the ImageView
+        //Map the ImageView
         val AlbumCover = findViewById<ImageView>(R.id.albumCover)
-        //Mapping the List View
+        //Map the List View
         val albumDetailsListView = findViewById<ListView>(R.id.albumDetailsListView)
 
         //Replacing the current source of the Image view using the URI
@@ -42,9 +40,10 @@ class AlbumDetailsActivity : AppCompatActivity() {
         AlbumCover.setImageDrawable(res) //Attach/set the drawable to the Image view
 
         //Attach the adapter to the list view
-        adapter = ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, songsToBeDisplayed)
+        adapter = ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, albumSongs)
         albumDetailsListView.adapter = adapter
 
+        //Register the list view to the context menu
         registerForContextMenu(albumDetailsListView)
 
 
@@ -70,8 +69,8 @@ class AlbumDetailsActivity : AppCompatActivity() {
                         .setCancelable(false)
                         .setPositiveButton("Yes", DialogInterface.OnClickListener {
                             dialog, which ->
-                            val song = songsToBeDisplayed[menuInfo.position]
-                            songsToBeDisplayed.removeAt(menuInfo.position) //gets the position and remove
+                            val song = albumSongs[menuInfo.position]
+                            albumSongs.removeAt(menuInfo.position) //gets the position and remove
                             adapter.notifyDataSetChanged() //Notify the adapter
                         }).setNegativeButton( "No", DialogInterface.OnClickListener {
                             dialog, which ->
