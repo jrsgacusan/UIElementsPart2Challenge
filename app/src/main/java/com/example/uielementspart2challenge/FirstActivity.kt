@@ -1,6 +1,6 @@
 package com.example.uielementspart2challenge
 
-import android.annotation.SuppressLint
+
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -8,26 +8,34 @@ import android.view.*
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.ListView
+import android.widget.Toast
+import com.example.uielementspart2challenge.models.Song
 import com.google.android.material.snackbar.Snackbar
 
 val queuedSongs = ArrayList<String>() //Array where all the songs queued will be stored and will be passed to the Queue activity
-val songsArray = arrayListOf<String>()
+//lateinit var queuedSongs = MutableList<Song>
+lateinit var songsArray: MutableList<Song>
+lateinit var songsAdapter: ArrayAdapter<Song>
 
 class FirstActivity : AppCompatActivity() {
+
+    lateinit var songsDatabaseHandler: SongsDatabaseHandler
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_first)
 
-        //Add the songs
-        songsArray.addAll(resources.getStringArray(R.array.scorpion))
-        songsArray.addAll(resources.getStringArray(R.array.abbeyRoad))
-        songsArray.addAll(resources.getStringArray(R.array.divide))
+
+        //Get the table handler
+        songsDatabaseHandler = SongsDatabaseHandler(this)
+        //get the records from the database
+        songsArray = songsDatabaseHandler.read()
 
         //Map the views
         var songsListView  = findViewById<ListView>(R.id.songsListView)
         //Adapter for the list view
-        val adapter = ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, songsArray)
-        songsListView.adapter = adapter
+        songsAdapter = ArrayAdapter<Song>(this, android.R.layout.simple_list_item_1, songsArray)
+        songsListView.adapter = songsAdapter
 
         //Register the context menu to the List View
         registerForContextMenu(songsListView)
@@ -48,13 +56,32 @@ class FirstActivity : AppCompatActivity() {
         val menuInfo = item.menuInfo as AdapterView.AdapterContextMenuInfo //Allows us to inherit from the class Adapterview.AdapterCOntextMenuInfo to get the position
         return when (item.itemId) {
             R.id.add_song_to_queue -> {
-                queuedSongs.add(songsArray[menuInfo.position])
-                val snackbar = Snackbar.make(findViewById(R.id.songsListView), "${songsArray[menuInfo.position]} is added to the Queue.", Snackbar.LENGTH_LONG)
+                val song = songsArray[menuInfo.position].title
+                queuedSongs.add(song)
+                val snackbar = Snackbar.make(findViewById(R.id.songsListView), "$song is added to the Queue.", Snackbar.LENGTH_LONG)
                 snackbar.setAction("Queue", View.OnClickListener { //Lamda function
                     val intent = Intent(this, QueueActivity::class.java)
                     startActivity(intent)
                 })
                 snackbar.show()
+                true
+            }
+            R.id.editSong -> {
+                val intent = Intent (this, EditSongActivity::class.java)
+                val song_id = songsArray[menuInfo.position].id
+                intent.putExtra("song_id", song_id)
+                startActivity(intent)
+                true
+            }
+            R.id.deleteSong -> {
+                val song = songsArray[menuInfo.position]
+                if(songsDatabaseHandler.delete(song)){
+                    songsArray.removeAt(menuInfo.position)
+                    songsAdapter.notifyDataSetChanged()
+                    Toast.makeText(this, "Song deleted.", Toast.LENGTH_SHORT).show()
+                } else {
+                    Toast.makeText(this, "Something went wrong.", Toast.LENGTH_SHORT).show()
+                }
                 true
             }
             else -> {
@@ -70,7 +97,6 @@ class FirstActivity : AppCompatActivity() {
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         val inflater = menuInflater
         inflater.inflate(R.menu.main_menu, menu)
-        return super.onCreateOptionsMenu(menu)
         return true
     }
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
@@ -85,6 +111,11 @@ class FirstActivity : AppCompatActivity() {
             }
             R.id.go_to_queue -> {
                 val intent = Intent(this, QueueActivity::class.java)
+                startActivity(intent)
+                true
+            }
+            R.id.addASong -> {
+                val intent = Intent(this, AddSongActivity::class.java)
                 startActivity(intent)
                 true
             }

@@ -10,10 +10,7 @@ import android.view.ContextMenu
 import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
-import android.widget.AdapterView
-import android.widget.ArrayAdapter
-import android.widget.ImageView
-import android.widget.ListView
+import android.widget.*
 import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContextCompat
 import com.google.android.material.snackbar.Snackbar
@@ -33,6 +30,9 @@ class AlbumDetailsActivity : AppCompatActivity() {
         val AlbumCover = findViewById<ImageView>(R.id.albumCover)
         //Map the List View
         val albumDetailsListView = findViewById<ListView>(R.id.albumDetailsListView)
+        //map the edit text for the title
+        val title = findViewById<TextView>(R.id.albumTitle)
+        title.setText(intent.getStringExtra("albumTitle").toString())
 
         //Replacing the current source of the Image view using the URI
         var imageResource = getResources().getIdentifier(uri, null, getPackageName()) //Gets the resource using the URI

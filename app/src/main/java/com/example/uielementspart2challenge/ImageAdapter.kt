@@ -6,6 +6,8 @@ import android.view.ViewGroup
 import android.widget.*
 
 class ImageAdapter(val c: Context):BaseAdapter() {
+
+
     private val mContext: Context
     init {
         mContext = c
