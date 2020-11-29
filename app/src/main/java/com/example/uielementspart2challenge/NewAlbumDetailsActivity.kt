@@ -24,6 +24,7 @@ class NewAlbumDetailsActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_new_album_details)
+
         val album_id = intent.getIntExtra("album_id", 0)
 
         albumTitle = findViewById(R.id.albumTitle_new)
@@ -33,7 +34,7 @@ class NewAlbumDetailsActivity : AppCompatActivity() {
 
         album = songsDatabaseHandler.readOneAlbum(album_id)
 
-        albumSongs = songsDatabaseHandler.readAlbumSongs()
+        albumSongs = songsDatabaseHandler.readAlbumSongs(album.albumTitle)
 
         albumSongsArrayAdapter = ArrayAdapter(this, android.R.layout.simple_list_item_1, albumSongs)
         albumSongsListView.adapter = albumSongsArrayAdapter
@@ -85,6 +86,8 @@ class NewAlbumDetailsActivity : AppCompatActivity() {
         when(item.itemId) {
             R.id.addSongToAlbum -> {
                 val intent = Intent(this, AddSongToAlbumActivity::class.java)
+                val albumTitle = album.albumTitle
+                intent.putExtra("albumTitle", albumTitle)
                 startActivity(intent)
                 true
             }

@@ -39,8 +39,8 @@ class SongsDatabaseHandler(var context: Context): SQLiteOpenHelper(context, DATA
         //define the query
 
         val query = "CREATE TABLE "+ TABLE_NAME + " ( "+ COL_ID+ " INTEGER PRIMARY KEY, " + COL_TITLE + " TEXT, "+ COL_ARTIST+ " TEXT, " + COL_ALBUM + " TEXT)"
-        val secondQuery = "CREATE TABLE "+ ALBUMS_TABLE + " ( "+ COL_ID + " INTEGER PRIMARY KEY, " + ALBUM_TITLE + " TEXT, "+ ALBUM_RELEASE_DATE+ " TEXT)";
-        val thirdQuery = "CREATE TABLE "+ ALBUM_SONGS + " ( "+ COL_ID+ " INTEGER PRIMARY KEY, " + COL_TITLE + " TEXT)"
+        val secondQuery = "CREATE TABLE "+ ALBUMS_TABLE + " ( "+ COL_ID + " INTEGER PRIMARY KEY, " + ALBUM_TITLE + " TEXT, "+ ALBUM_RELEASE_DATE+ " TEXT)"
+        val thirdQuery = "CREATE TABLE "+ ALBUM_SONGS + " ( "+ COL_ID+ " INTEGER PRIMARY KEY, " + COL_TITLE + " TEXT, " + COL_ALBUM + " TEXT)"
         //Execute the query
         if (db != null) {
             db.execSQL(query)
@@ -59,6 +59,7 @@ class SongsDatabaseHandler(var context: Context): SQLiteOpenHelper(context, DATA
         //TODO("Not yet implemented")
         db!!.execSQL("DROP TABLE IF EXISTS " + TABLE_NAME)
         db!!.execSQL("DROP TABLE IF EXISTS " + ALBUMS_TABLE)
+        db!!.execSQL("DROP TABLE IF EXISTS " + ALBUM_SONGS)
         onCreate(db)
     }
 
@@ -268,6 +269,7 @@ class SongsDatabaseHandler(var context: Context): SQLiteOpenHelper(context, DATA
         }
         return true
     }
+    //Album Songs
 
     fun createAlbumSongs(song: AlbumSong): Boolean {
 
@@ -276,6 +278,7 @@ class SongsDatabaseHandler(var context: Context): SQLiteOpenHelper(context, DATA
         //set the ContentValues
         val contentValue = ContentValues()
         contentValue.put(COL_TITLE, song.albumSong)
+        contentValue.put(COL_ALBUM, song.albumTitle)
         //Insert to the Db
         val result = database.insert(ALBUM_SONGS, null, contentValue)
         //check for result
@@ -285,9 +288,9 @@ class SongsDatabaseHandler(var context: Context): SQLiteOpenHelper(context, DATA
         return true
     }
 
-    fun readAlbumSongs(): MutableList<AlbumSong>{
+    fun readAlbumSongs(title: String): MutableList<AlbumSong>{
         val songsList: MutableList<AlbumSong> = ArrayList<AlbumSong>()
-        val query = "SELECT * FROM " + ALBUM_SONGS
+        val query = "SELECT * FROM $ALBUM_SONGS WHERE $COL_ALBUM = '$title' "
         val database = this.readableDatabase
         var cursor: Cursor? = null
         try {
@@ -298,11 +301,13 @@ class SongsDatabaseHandler(var context: Context): SQLiteOpenHelper(context, DATA
 
         var id: Int
         var title: String
+        var album_title : String
         if (cursor.moveToFirst()) {
             do {
                 id=cursor.getInt(cursor.getColumnIndex(COL_ID))
                 title= cursor.getString(cursor.getColumnIndex(COL_TITLE))
-                val albumSong = AlbumSong(id, title)
+                album_title = cursor.getString(cursor.getColumnIndex(COL_ALBUM))
+                val albumSong = AlbumSong(id, title, album_title)
                 songsList.add(albumSong)
             } while (cursor.moveToNext())
         }
@@ -313,7 +318,7 @@ class SongsDatabaseHandler(var context: Context): SQLiteOpenHelper(context, DATA
 
     fun deleteAlbumSongs(albumSong: AlbumSong): Boolean {
         val database = this.writableDatabase
-        val result = database.delete(TABLE_NAME, "id=${albumSong.id}", null)
+        val result = database.delete(ALBUM_SONGS, "id=${albumSong.id}", null)
         if (result == 0 ){
             false
         }
